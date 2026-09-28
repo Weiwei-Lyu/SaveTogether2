@@ -15,3 +15,7 @@ Required environment variables in `.env.local`:
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 
 After signup, open the confirmation link in email, then log in with the same password.
+
+## Live app
+
+https://savetogether2.vercel.app/
