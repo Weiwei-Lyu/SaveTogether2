@@ -7,10 +7,9 @@ import { PersonalRecordForm } from "@/components/personal/RecordForm";
 import { PersonalRecordList } from "@/components/personal/RecordList";
 import { deleteGoalAction } from "@/lib/actions/personal";
 import { requireUser } from "@/lib/auth";
+import { PlannedPathSummary } from "@/components/personal/PlannedPathSummary";
 import {
-  cadenceLabel,
   formatMoney,
-  plannedProjection,
   progressPercent,
   remainingAmount,
   todayISO,
@@ -44,7 +43,7 @@ export default async function PersonalGoalPage({
     .order("recorded_on", { ascending: false });
 
   const confirmed = sumRecords(records ?? []);
-  const projection = plannedProjection(goal.planned_amount, goal.cadence);
+  const remaining = remainingAmount(confirmed, Number(goal.target_amount));
 
   return (
     <div className="space-y-8">
@@ -53,22 +52,18 @@ export default async function PersonalGoalPage({
       </Link>
       <div className="rounded-3xl bg-card p-6 shadow-sm">
         <h1 className="font-serif text-4xl">{goal.name}</h1>
-        <dl className="mt-6 grid gap-4 sm:grid-cols-3">
+        <p className="mt-2 text-sm text-muted">
+          Target {formatMoney(Number(goal.target_amount))}. The numbers below are
+          money you already recorded — not the planned path.
+        </p>
+        <dl className="mt-6 grid gap-4 sm:grid-cols-2">
           <div>
             <dt className="text-sm text-muted">Confirmed saved</dt>
             <dd className="mt-1 text-2xl">{formatMoney(confirmed)}</dd>
           </div>
           <div>
             <dt className="text-sm text-muted">Remaining</dt>
-            <dd className="mt-1 text-2xl">
-              {formatMoney(remainingAmount(confirmed, Number(goal.target_amount)))}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-sm text-muted">Planned-path projection</dt>
-            <dd className="mt-1 text-2xl">
-              {projection !== null ? formatMoney(projection) : "—"}
-            </dd>
+            <dd className="mt-1 text-2xl">{formatMoney(remaining)}</dd>
           </div>
         </dl>
         <div className="mt-6">
@@ -77,12 +72,13 @@ export default async function PersonalGoalPage({
             label={`${goal.name} confirmed progress`}
           />
         </div>
-        {projection !== null && goal.cadence && goal.planned_amount ? (
-          <p className="mt-4 text-sm text-muted">
-            Planned path {formatMoney(Number(goal.planned_amount))} /{" "}
-            {cadenceLabel(goal.cadence)} starting {goal.start_date}. This number
-            does not increase confirmed saved.
-          </p>
+        {goal.cadence && goal.planned_amount ? (
+          <PlannedPathSummary
+            plannedAmount={Number(goal.planned_amount)}
+            cadence={goal.cadence}
+            remaining={remaining}
+            startDate={goal.start_date}
+          />
         ) : (
           <p className="mt-4 text-sm text-muted">
             No planned path. Confirmed saved stays at {formatMoney(confirmed)} until you record a contribution.

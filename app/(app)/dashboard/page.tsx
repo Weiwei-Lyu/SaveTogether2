@@ -1,13 +1,8 @@
 import Link from "next/link";
 import { ProgressBar } from "@/components/ProgressBar";
 import { requireProfile } from "@/lib/auth";
-import {
-  cadenceLabel,
-  formatDate,
-  formatMoney,
-  plannedProjection,
-  progressPercent,
-} from "@/lib/format";
+import { PlannedPathSummary } from "@/components/personal/PlannedPathSummary";
+import { formatDate, formatMoney, progressPercent, remainingAmount } from "@/lib/format";
 import { createClient } from "@/lib/supabase/server";
 import { latestRecord, sumRecords } from "@/lib/totals";
 
@@ -98,7 +93,7 @@ export default async function DashboardPage() {
               const confirmed = sumRecords(
                 myPrivateRecords.filter((record) => record.private_goal_id === goal.id),
               );
-              const projection = plannedProjection(goal.planned_amount, goal.cadence);
+              const remaining = remainingAmount(confirmed, Number(goal.target_amount));
               return (
                 <Link
                   key={goal.id}
@@ -115,11 +110,13 @@ export default async function DashboardPage() {
                       label={`${goal.name} confirmed progress`}
                     />
                   </div>
-                  {projection !== null && goal.cadence && goal.planned_amount ? (
-                    <p className="mt-3 text-sm text-muted">
-                      Planned path: {formatMoney(Number(goal.planned_amount))} /{" "}
-                      {cadenceLabel(goal.cadence)} · one-year projection {formatMoney(projection)}
-                    </p>
+                  {goal.cadence && goal.planned_amount ? (
+                    <PlannedPathSummary
+                      plannedAmount={Number(goal.planned_amount)}
+                      cadence={goal.cadence}
+                      remaining={remaining}
+                      compact
+                    />
                   ) : null}
                 </Link>
               );

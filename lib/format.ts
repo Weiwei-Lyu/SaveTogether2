@@ -1,4 +1,7 @@
 import type { Cadence } from "@/lib/database.types";
+import { cadencePeriodLabel } from "@/lib/projections";
+
+export { yearlyProjectedSavings as plannedProjection } from "@/lib/projections";
 
 export function formatMoney(amount: number) {
   return new Intl.NumberFormat("en-US", {
@@ -23,18 +26,8 @@ export function todayISO() {
   return new Date(now.getTime() - offset).toISOString().slice(0, 10);
 }
 
-export function plannedProjection(
-  plannedAmount: number | null,
-  cadence: Cadence | null,
-) {
-  if (!plannedAmount || !cadence) return null;
-  if (cadence === "daily") return plannedAmount * 365;
-  if (cadence === "weekly") return plannedAmount * 52;
-  return plannedAmount * 12;
-}
-
 export function cadenceLabel(cadence: Cadence) {
-  return { daily: "day", weekly: "week", monthly: "month" }[cadence];
+  return cadencePeriodLabel(cadence);
 }
 
 export function progressPercent(confirmed: number, target: number) {

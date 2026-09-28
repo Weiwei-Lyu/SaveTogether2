@@ -49,7 +49,8 @@ export function GoalForm({
       <div className="sm:col-span-2 rounded-2xl border border-dashed border-line p-4">
         <p className="mb-3 text-sm font-medium text-ink">Planned path (optional)</p>
         <p className="mb-4 text-sm text-muted">
-          This is a calculator only. It never adds money to confirmed saved.
+          This is a calculator only. A $10 weekly plan shows $520 as Projected
+          Savings in 1 Year. It never adds money to confirmed saved.
         </p>
         <div className="grid gap-4 sm:grid-cols-3">
           <Field label="Planned amount">

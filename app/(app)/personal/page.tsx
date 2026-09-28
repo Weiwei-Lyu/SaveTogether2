@@ -1,11 +1,10 @@
 import Link from "next/link";
 import { GoalForm } from "@/components/personal/GoalForm";
+import { PlannedPathSummary } from "@/components/personal/PlannedPathSummary";
 import { ProgressBar } from "@/components/ProgressBar";
 import { requireUser } from "@/lib/auth";
 import {
-  cadenceLabel,
   formatMoney,
-  plannedProjection,
   progressPercent,
   remainingAmount,
   todayISO,
@@ -43,8 +42,9 @@ export default async function PersonalPage() {
       <section className="rounded-3xl bg-card p-6 shadow-sm">
         <h2 className="font-serif text-2xl">Add a goal</h2>
         <p className="mt-2 mb-5 text-sm text-muted">
-          Example: a $1,000 vacation with $10 each week can show a $520 yearly
-          projection while confirmed saved stays $0.
+          Example: a $1,000 vacation with $10 each week shows $520 as Projected
+          Savings in 1 Year, while confirmed saved stays $0 until you record a
+          contribution. Daily and monthly plans work the same way.
         </p>
         <GoalForm today={todayISO()} />
       </section>
@@ -61,7 +61,7 @@ export default async function PersonalPage() {
               const confirmed = sumRecords(
                 privateRecords.filter((record) => record.private_goal_id === goal.id),
               );
-              const projection = plannedProjection(goal.planned_amount, goal.cadence);
+              const remaining = remainingAmount(confirmed, Number(goal.target_amount));
               return (
                 <Link
                   key={goal.id}
@@ -73,7 +73,7 @@ export default async function PersonalPage() {
                       <h3 className="text-xl font-medium">{goal.name}</h3>
                       <p className="mt-1 text-sm text-muted">
                         Target {formatMoney(Number(goal.target_amount))} · remaining{" "}
-                        {formatMoney(remainingAmount(confirmed, Number(goal.target_amount)))}
+                        {formatMoney(remaining)}
                       </p>
                     </div>
                     <p className="text-lg font-medium">{formatMoney(confirmed)} confirmed</p>
@@ -84,12 +84,14 @@ export default async function PersonalPage() {
                       label={`${goal.name} confirmed progress`}
                     />
                   </div>
-                  {projection !== null && goal.cadence && goal.planned_amount ? (
-                    <p className="mt-3 text-sm text-muted">
-                      Planned path {formatMoney(Number(goal.planned_amount))} /{" "}
-                      {cadenceLabel(goal.cadence)} from {goal.start_date} · one-year
-                      projection {formatMoney(projection)}
-                    </p>
+                  {goal.cadence && goal.planned_amount ? (
+                    <PlannedPathSummary
+                      plannedAmount={Number(goal.planned_amount)}
+                      cadence={goal.cadence}
+                      remaining={remaining}
+                      startDate={goal.start_date}
+                      compact
+                    />
                   ) : (
                     <p className="mt-3 text-sm text-muted">No planned path on this goal.</p>
                   )}
